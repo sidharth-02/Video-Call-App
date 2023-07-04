@@ -31,11 +31,19 @@ const ContextProvider = ({ children }) => {
             .catch((error) => {
                 console.log('Error accessing media devices:', error);
             });
+
+        
+            
         socket.on('me', (id) => setMe(id));
 
         socket.on('callUser', ({ from, name: callerName, signal }) => {
             setCall({ isReceivingCall: true, from, name: callerName, signal });
         });
+
+        socket.on('callEnded', ()=>{
+            leaveCall();
+        });
+
     }, []);
 
     const answerCall = () => {
@@ -79,7 +87,10 @@ const ContextProvider = ({ children }) => {
     const leaveCall = () => {
         setCallEnded(true);
 
-        connectionRef.current.destroy();
+        if (connectionRef.current) {
+            connectionRef.current.destroyed = true;
+        }
+        
 
         window.location.reload();
     };
